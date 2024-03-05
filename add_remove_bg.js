@@ -1,12 +1,13 @@
 const backGroundColors = require('./colors');
 const path = require('path');
 const gm = require('gm').subClass({imageMagick: true});
-const getAllImages = require('./get_all_files');
+const files = require('./files');
+const getAllFiles = files.getAllFiles;
 const replaceColor = require('replace-color');
 
 const addRemoveBackground = async function() {
     const workDir = path.join(__dirname, './images');
-    const images = getAllImages(workDir);
+    const images = getAllFiles(workDir);
     let addBgResult = true;
     for (let image of images) {
         const size = await getImageSize(image);
@@ -22,7 +23,7 @@ const addRemoveBackground = async function() {
         }
     }
 
-    const imagesWithBackground = getAllImages(path.join(__dirname, './images_with_background'));
+    const imagesWithBackground = getAllFiles(path.join(__dirname, './images_with_background'));
     let replaceResult = true
     for (let imageWithBackground of imagesWithBackground) {
         const imageName = path.parse(imageWithBackground).name;

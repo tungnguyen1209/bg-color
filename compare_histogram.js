@@ -1,7 +1,7 @@
 const cv = require('opencv4nodejs');
-const getAllImages = require('./get_all_files');
+const files = require('./files');
+const getAllFiles = files.getAllFiles;
 const path = require('path');
-const isBlankImage = require('./is_blank_image');
 
 function calculateHistogram(imagePath) {
     try {
@@ -22,17 +22,24 @@ function calculateHistogram(imagePath) {
 }
 
 function compareHistogram() {
-    const imagesWithNoBackground = getAllImages(path.join(__dirname, './images_with_no_background'));
-    const images = getAllImages(path.join(__dirname, './images'));
-    let result = [];
-    for (let imageWithNoBackground of imagesWithNoBackground) {
-        for (let image of images) {
+    const imagesWithNoBackground = getAllFiles(path.join(__dirname, './images_with_no_background'));
+    const images = getAllFiles(path.join(__dirname, './images'));
+    let result = {};
+    for (let image of images) {
+        for (let imageWithNoBackground of imagesWithNoBackground) {
             const hist1 = calculateHistogram(image);
             const hist2 = calculateHistogram(imageWithNoBackground);
             const correl = hist1.compareHist(hist2, cv.HISTCMP_CORREL);
-            result.push(correl);
+            const imageName = path.parse(imageWithNoBackground).name;
+            const color = imageName.split('_')[1];
+            result[color] = correl;
         }
     }
+
+    const removeAllFiles = files.removeAllFiles;
+    removeAllFiles('./images');
+    removeAllFiles('./images_with_background');
+    removeAllFiles('./images_with_no_background');
     
     return result;
 }

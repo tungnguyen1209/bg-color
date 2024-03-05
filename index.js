@@ -17,17 +17,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// API endpoint for file upload
+// API endpoint
 app.post('/bg-color', upload.single('file'), async (req, res) => {
     if (!req.file) {
         return res.status(400).send('No file uploaded.');
     }
 
-    const result = await addRemoveBackground();
-    if (result) {
-        const correl = compareHistogram();
-        res.status(200).json({ correl });
-    } else {
+    try {
+        const result = await addRemoveBackground();
+        if (result) {
+            const colors = compareHistogram();
+            res.status(200).json({ 'status': 'Successfully', 'colors': colors });
+        } else {
+            res.status(500).json({ message: 'Failure'});
+        }
+    } catch(err) {
         res.status(500).json({ message: 'Failure'});
     }
 });

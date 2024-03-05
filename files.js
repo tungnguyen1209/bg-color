@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path');
 
-module.exports = function* getAllImages(dir) {
+function* getAllFiles(dir) {
     const directs = fs.readdirSync(dir, { withFileTypes: true })
     for (const direct of directs) {
         if (direct.name !== '.gitkeep') {
@@ -14,3 +14,13 @@ module.exports = function* getAllImages(dir) {
         }
     }
 }
+
+function removeAllFiles(dir) {
+    const files = getAllFiles(dir);
+    for (let file of files) {
+        console.log(file)
+        fs.unlinkSync(file);
+    }
+}
+
+module.exports = { 'getAllFiles': getAllFiles, 'removeAllFiles': removeAllFiles }
