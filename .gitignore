@@ -1,0 +1,7 @@
+node_modules
+images/*
+!images/.gitkeep
+images_with_background/*
+!images_with_background/.gitkeep
+images_with_no_background/*
+!images_with_no_background/.gitkeep
