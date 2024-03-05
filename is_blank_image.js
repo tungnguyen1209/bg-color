@@ -10,7 +10,7 @@ async function isBlankImage(imagePath) {
                 const alpha = data[i + metadata.channels - 1];
                     const isWhite = data.slice(i, i + metadata.channels - 1).every(val => val === 255);
                 if (alpha !== 0 && !isWhite) {
-                    reject(false);
+                    resolve(false);
                 }
             }
     

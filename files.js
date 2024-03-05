@@ -18,7 +18,6 @@ function* getAllFiles(dir) {
 function removeAllFiles(dir) {
     const files = getAllFiles(dir);
     for (let file of files) {
-        console.log(file)
         fs.unlinkSync(file);
     }
 }

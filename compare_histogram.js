@@ -2,6 +2,7 @@ const cv = require('opencv4nodejs');
 const files = require('./files');
 const getAllFiles = files.getAllFiles;
 const path = require('path');
+const isBlankImage = require('./is_blank_image');
 
 function calculateHistogram(imagePath) {
     try {
@@ -21,27 +22,38 @@ function calculateHistogram(imagePath) {
     }
 }
 
-function compareHistogram() {
+async function compareHistogram() {
+    let colors = {}
     const imagesWithNoBackground = getAllFiles(path.join(__dirname, './images_with_no_background'));
     const images = getAllFiles(path.join(__dirname, './images'));
     let result = {};
     for (let image of images) {
+        let totalCorrel = 0;
+        const hist1 = calculateHistogram(image);
         for (let imageWithNoBackground of imagesWithNoBackground) {
-            const hist1 = calculateHistogram(image);
+            const isBlank = await isBlankImage(imageWithNoBackground);
             const hist2 = calculateHistogram(imageWithNoBackground);
             const correl = hist1.compareHist(hist2, cv.HISTCMP_CORREL);
+            totalCorrel += correl;
             const imageName = path.parse(imageWithNoBackground).name;
             const color = imageName.split('_')[1];
-            result[color] = correl;
+            if (!isBlank) {
+                result[color] = correl;
+            } else {
+                colors[color] = correl;
+            }
         }
-    }
 
-    const removeAllFiles = files.removeAllFiles;
-    removeAllFiles('./images');
-    removeAllFiles('./images_with_background');
-    removeAllFiles('./images_with_no_background');
+        const averageCorrel = totalCorrel / 24;
+        console.log(result);
+        Object.keys(result).forEach(function(key) {
+            if (((averageCorrel - result[key]) / averageCorrel ) * 100 > 5) {
+                colors[key] = result[key];
+            }
+        });
+    }
     
-    return result;
+    return colors;
 }
 
 
