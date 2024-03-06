@@ -22,7 +22,7 @@ function calculateHistogram(imagePath) {
     }
 }
 
-async function compareHistogram() {
+async function compareImages() {
     let colors = {}
     const imagesWithNoBackground = getAllFiles(path.join(__dirname, './images_with_no_background'));
     const images = getAllFiles(path.join(__dirname, './images'));
@@ -33,7 +33,7 @@ async function compareHistogram() {
         for (let imageWithNoBackground of imagesWithNoBackground) {
             const isBlank = await isBlankImage(imageWithNoBackground);
             const hist2 = calculateHistogram(imageWithNoBackground);
-            const correl = hist1.compareHist(hist2, cv.HISTCMP_CORREL);
+            const correl = hist1.compareHist(hist2, cv.HISTCMP_KL_DIV);
             totalCorrel += correl;
             const imageName = path.parse(imageWithNoBackground).name;
             const color = imageName.split('_')[1];
@@ -45,7 +45,6 @@ async function compareHistogram() {
         }
 
         const averageCorrel = totalCorrel / 24;
-        console.log(result);
         Object.keys(result).forEach(function(key) {
             if (((averageCorrel - result[key]) / averageCorrel ) * 100 > 5) {
                 colors[key] = result[key];
@@ -53,8 +52,8 @@ async function compareHistogram() {
         });
     }
     
-    return colors;
+    return result;
 }
 
 
-module.exports = compareHistogram
+module.exports = compareImages

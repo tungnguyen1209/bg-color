@@ -1,5 +1,5 @@
 const addRemoveBackground = require('./add_remove_bg');
-const compareHistogram = require('./compare_histogram');
+const compareImages = require('./compare_images');
 const files = require('./files');
 const express = require('express');
 const multer = require('multer');
@@ -27,12 +27,12 @@ app.post('/bg-color', upload.single('file'), async (req, res) => {
     try {
         const result = await addRemoveBackground();
         if (result) {
-            const colors = await compareHistogram();
+            const colors = await compareImages();
              // remove all images
             const removeAllFiles = files.removeAllFiles;
-            // removeAllFiles('./images');
-            // removeAllFiles('./images_with_background');
-            // removeAllFiles('./images_with_no_background');
+            removeAllFiles('./images');
+            removeAllFiles('./images_with_background');
+            removeAllFiles('./images_with_no_background');
             res.status(200).json({ 'status': 'Successfully', 'incompatible_colors': colors });
         } else {
             res.status(500).json({ message: 'Failure'});
