@@ -23,37 +23,70 @@ function calculateHistogram(imagePath) {
 }
 
 async function compareImages() {
-    let colors = {}
+    let colors = []
     const imagesWithNoBackground = getAllFiles(path.join(__dirname, './images_with_no_background'));
     const images = getAllFiles(path.join(__dirname, './images'));
-    let result = {};
-    const numberColors = imagesWithNoBackground.length
+    let resultChiSquare = {};
+    let resultBhattacharyya = {};
+    let resultKlDiv = {};
     for (let image of images) {
-        let totalCorrel = 0;
+        let totalChiSquare = 0;
+        let totalBhattacharyya = 0;
+        let totalKlDiv = 0;
         const hist1 = calculateHistogram(image);
         for (let imageWithNoBackground of imagesWithNoBackground) {
             const isBlank = await isBlankImage(imageWithNoBackground);
             const hist2 = calculateHistogram(imageWithNoBackground);
             const correl = hist1.compareHist(hist2, cv.HISTCMP_CORREL);
-            totalCorrel += correl;
+            const chiSquare = hist1.compareHist(hist2, cv.HISTCMP_CHISQR);
+            const bhattacharyya = hist1.compareHist(hist2, cv.HISTCMP_BHATTACHARYYA);
+            const klDiv = hist1.compareHist(hist2, cv.HISTCMP_KL_DIV);
+
             const imageName = path.parse(imageWithNoBackground).name;
             const color = imageName.split('_')[1];
-            if (!isBlank) {
-                result[color] = correl;
+            if (!isBlank || correl >= 0.9) {
+                resultChiSquare[color] = chiSquare;
+                totalChiSquare += chiSquare;
+                resultBhattacharyya[color] = bhattacharyya;
+                totalBhattacharyya += bhattacharyya;
+                resultKlDiv[color] = klDiv;
+                totalKlDiv += klDiv;
             } else {
-                colors[color] = correl;
+                // incompatible if blank image or correl < 0.9
+                colors.push(color);
             }
         }
+        
+        let averageChiSquare = totalChiSquare / (Object.keys(resultChiSquare).length);
+        Object.keys(resultChiSquare).forEach(function(key) {
+            const threshold = ((averageChiSquare - resultChiSquare[key]) / averageChiSquare ) * 100;
+            if (threshold > 40) {
+                colors.push(key);
+            }
+        });
 
-        const averageCorrel = totalCorrel / numberColors;
-        Object.keys(result).forEach(function(key) {
-            if (((averageCorrel - result[key]) / averageCorrel ) * 100 > 5) {
-                colors[key] = result[key];
+        const averageBhattacharyya = totalBhattacharyya / (Object.keys(resultBhattacharyya).length);
+        Object.keys(resultBhattacharyya).forEach(function(key) {
+            const threshold = ((resultBhattacharyya[key] - averageBhattacharyya) / averageBhattacharyya ) * 100;
+            if (threshold > 6) {
+                colors.push(key);
+            }
+        });
+
+        const averageKlDiv = totalKlDiv / (Object.keys(resultKlDiv).length);
+        Object.keys(resultKlDiv).forEach(function(key) {
+            const threshold = ((resultKlDiv[key] - averageKlDiv) / averageKlDiv ) * 100;
+            if (threshold > 40) {
+                colors.push(key);
             }
         });
     }
-    
-    return colors;
+
+    uniqueColors = colors.filter(function(elem, pos) {
+        return colors.indexOf(elem) == pos;
+    })
+
+    return uniqueColors;
 }
 
 module.exports = compareImages
