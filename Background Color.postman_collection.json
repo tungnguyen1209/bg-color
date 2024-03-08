@@ -1,0 +1,42 @@
+{
+	"info": {
+		"_postman_id": "d54b62fc-a768-4f89-a40f-cbeaf528edd4",
+		"name": "Background Color",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26426877"
+	},
+	"item": [
+		{
+			"name": "http://127.0.0.1:3000/bg-color",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": []
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3000/bg-color",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3000",
+					"path": [
+						"bg-color"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
